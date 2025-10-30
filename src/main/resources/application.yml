@@ -24,16 +24,16 @@ spring:
 # Email Settings
   mail:
     username: mamodeayeye1@gmail.com
-    password: vkru rvlv nwwz wlfr
+    password: gphn lxog pwrl fzpi
     host: smtp.gmail.com
     port: 587
     protocol: smtp
     properties:
-     mail:
-      smtp:
-      auth: true
-      starttls:
-        enable: true
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 # Common Database Settings
   sql:
     init:
