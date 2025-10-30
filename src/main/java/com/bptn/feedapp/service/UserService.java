@@ -23,6 +23,9 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import org.springframework.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import org.springframework.util.StringUtils;
 
 @Service
 public class UserService {
@@ -152,6 +155,44 @@ public class UserService {
         		    /* Get User from the DB. */
         		    return this.userRepository.findByUsername(username)
         		.orElseThrow(() -> new UserNotFoundException(String.format("Username doesn't exist, %s",username)));
+        		}
+        	  private void updateValue(Supplier<String> getter, Consumer<String> setter) {
+        	        
+        		    Optional.ofNullable(getter.get())
+        		            //.filter(StringUtils::hasText)
+        		               .map(String::trim)
+        		               .ifPresent(setter);
+        		}
+        	  private void updatePassword(Supplier<String> getter, Consumer<String> setter) {
+
+        		    Optional.ofNullable(getter.get())
+        		               .filter(StringUtils::hasText)
+        		               .map(this.passwordEncoder::encode)
+        		               .ifPresent(setter);
+        		}
+        	  private User updateUser(User user, User currentUser) {
+        		    
+        		  this.updateValue(user::getFirstName, currentUser::setFirstName);
+        		  this.updateValue(user::getLastName, currentUser::setLastName);
+        		  this.updateValue(user::getPhone, currentUser::setPhone);
+        		  this.updateValue(user::getEmailId, currentUser::setEmailId);
+        		  this.updatePassword(user::getPassword, currentUser::setPassword);
+
+        		  return this.userRepository.save(currentUser);
+        		}
+        	  public User updateUser(User user) {
+        	        
+        		    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        		    /* Validates the new email if provided */
+        		    this.userRepository.findByEmailId(user.getEmailId())
+        		                            .filter(u->!u.getUsername().equals(username))
+        		                            .ifPresent(u -> {throw new EmailExistException(String.format("Email already exists, %s", u.getEmailId()));});
+        		        
+        		    /* Get and Update User */   
+        		    return this.userRepository.findByUsername(username)
+        		                            .map(currentUser -> this.updateUser(user, currentUser))
+        		                            .orElseThrow(()-> new UserNotFoundException(String.format("Username doesn't exist, %s", username)));
         		}
 }
 
