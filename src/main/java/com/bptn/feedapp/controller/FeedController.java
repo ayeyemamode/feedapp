@@ -10,7 +10,8 @@ import com.bptn.feedapp.service.FeedService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.bptn.feedapp.jpa.Feed;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @CrossOrigin
 @RestController
@@ -26,5 +27,12 @@ public class FeedController {
 	    logger.debug("Creating Feed");
 	            
 	    return this.feedService.createFeed(feed);
+	}
+	@GetMapping("/{feedId}")
+	public Feed getFeed(@PathVariable int feedId) {
+	      
+	   logger.debug("Getting Feed, feedId: {}", feedId);
+	      
+	   return this.feedService.getFeedById(feedId); 
 	}
 }
